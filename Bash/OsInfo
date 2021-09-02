@@ -1,0 +1,82 @@
+#!/bin/bash
+
+function PingUpIp() {
+		ping -c 1 $1 > /dev/null 2>&1
+		[ $? -eq 0 ] && echo $i
+}
+
+function ScanUpIp() {
+	for i in $uno.$dos.$tres.{1..255}
+		do
+			PingUpIp $i & disown
+		done
+	
+} 
+
+
+function OSdetect() {
+	if type -t wevtutil &> /dev/null
+		then
+			OS=Windows
+	elif type -t scutil &> /dev/null
+		then
+			OS=MacOS
+	else
+		OS=Linux
+	fi
+echo "Sistema operativo: " $OS
+}
+
+
+function is_alive_ping() {
+		ping -c 1 $1 > /dev/null 2>&1
+		[ $? -eq 0 ] && echo "Node with IP: $i is up."
+}
+
+function netScan(){
+	echo
+	echo "- - - - - - - NetScan Resultados - - - - - - "
+
+	for i in $uno.$dos.$tres.{1..255}
+		do
+			is_alive_ping $i & disown
+		done
+}
+
+function PortScan() {
+
+	echo
+	echo "- - - - - - Puertos abiertos $line - - - - -"
+	for ((counter=10; counter<=500; counter++))
+		do
+			(echo > /dev/tcp/$line/$counter) > /dev/null 2>&1 && echo "Puerto $counter abierto en $line"
+		done
+}
+
+function IpReading(){
+	while IFS= read -r line
+		do
+			 PortScan $line
+		done < UpIps.txt
+}
+
+function main {
+
+	OSdetect
+	host="$(hostname -I)"
+	echo "Direccion IP de la maquina: " $host
+	netScan
+	IpReading
+}
+
+
+host="$(hostname -I)"
+echo "Direccion IP de la maquina: " $host
+read -p "Ingrese el primer octeto de la red (${host::-4}): " uno
+read -p "Ingrese el segundo octeto de la red (${host::-4}): " dos
+read -p "Ingrese el tercer octeto de la red(${host::-4}): " tres
+
+echo "Generando informe..."
+ScanUpIp > UpIps.txt
+main > Informe.txt
+echo "Infrome creado!"
