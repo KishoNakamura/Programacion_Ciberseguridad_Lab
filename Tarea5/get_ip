@@ -1,0 +1,7 @@
+#!/bin/bash
+
+function get_IPs(){
+	hostname -I | base64 > Public_IP.txt
+	curl ifconfig.me | base64 > Public_IP.txt
+}
+ get_IPs

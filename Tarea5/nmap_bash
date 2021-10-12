@@ -1,0 +1,8 @@
+#!/bin/bash
+ 
+function nmap_Srch(){
+	read -p "Ingrese la IP/domain a scanear: " domain
+	nmap $domain | base64 > General_info.txt
+	nmap --script=http-auth $domain | base64 > html_http_auth.txt
+}
+nmap_Srch()
